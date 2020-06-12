@@ -10,6 +10,7 @@ use App\ContractsModel;
 use App\User;
 use App\ShareModel;
 use Session;
+use SteamCondenser\Exceptions\SocketException;
 
 class ContractsController extends Controller
 {
@@ -75,10 +76,14 @@ class ContractsController extends Controller
 
     public function getEditContracts($id){
         $contracts = ContractsModel::find($id);
+        if (empty($contracts)) {
+            return view('dashboard.add');
+        }
         // echo "<pre>";
         // print_r($contracts);
         // echo "</pre>";die();
         return view('dashboard.edit' , compact('contracts'));
+
     }
 
     public function postEditContracts(Request $request,$id){
@@ -138,7 +143,11 @@ class ContractsController extends Controller
         if (!is_null($share)) {
             ShareModel::destroy($share);
         }
-        $contracts = ContractsModel::find($id)->delete();
+        $contracts = ContractsModel::find($id);
+        if (empty($contracts)) {
+            return redirect()->back()->withErrors('del fail');
+        }
+        $contracts->delete();
     	return redirect()->back()->with('success' , 'delete ok');
     }	
 
@@ -244,6 +253,9 @@ class ContractsController extends Controller
 
     public function getSendContracts($id){
         $contracts = ContractsModel::find($id);
+        if (empty($contracts)) {
+            return redirect()->back()->withErrors('not found contracts'); 
+        }
         $current_user = Auth::user()->id;
         $user = User::orderBy('id' , 'DESC')->whereNotIn('id' , [$current_user])->get();
         // echo "<pre>";
@@ -253,7 +265,10 @@ class ContractsController extends Controller
     }
 
     public function postSendContracts(Request $request , $id){
-        $share = ShareModel::where('id_contracts' , $id)->lists('id')->toArray();
+        $share = ShareModel::whereIn('id_contracts' , [$id])->lists('id')->toArray();
+        // echo "<pre>";
+        // print_r($share);
+        // echo "</pre>";die();
         if (!empty($share)) {
             ShareModel::destroy($share);
         }

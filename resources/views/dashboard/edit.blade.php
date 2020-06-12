@@ -16,7 +16,7 @@
             @endforeach
         </div>
     @endif
-    <form  action="{{ route('contracts.postEdit' , ['id' => $contracts->id]) }}" method="POST">
+    <form  action="{{ route('contracts.postEdit' , ['id' => $contracts['id']]) }}" method="POST">
         {{ csrf_field() }}
       <div>
         <label for="exampleInputEmail1">Name</label>

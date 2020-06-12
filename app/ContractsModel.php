@@ -23,4 +23,5 @@ class ContractsModel extends Model
     public function share(){
         return $this->hasMany('App\ShareModel' , 'id_contracts' , 'id');
     }
+
 }

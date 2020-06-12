@@ -8,6 +8,8 @@ use App\Http\Requests;
 use App\ContractsModel;
 use App\User;
 use App\ShareModel;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Services\PayUService\Exception;
 
 class ShareController extends Controller
 {
@@ -74,13 +76,29 @@ class ShareController extends Controller
     }
 
     public function getShareShowContractsHide($id){
-        $hide = ShareModel::where('id' , $id)->update(['status' => 1]);
+        $hide = ShareModel::where('id' , $id)->first();
+        if (empty($hide)) {
+            return redirect()->back()->withErrors('Hide fail'); 
+        }
+        $hide->status = 1;
+        $hide->save();
         return redirect()->back()->with('success' , 'Hide ok'); 
     }
 
     public function getShareShowContractsShow($id){
-        $show = ShareModel::where('id' , $id)->update(['status' => 0]);
-        return redirect()->back()->with('success' , 'Show ok'); 
+        $show = ShareModel::where('id' , $id)->first();
+        if (empty($show)) {
+            return redirect()->back()->withErrors('Show fail'); 
+        }
+        $show->status = 0;
+        $show->save();
+        return redirect()->back()->with('success' , 'Show ok');
+
+        // try{
+        //     $show = ShareModel::findOrFail($id);
+        // }catch (Exception $e){
+        //     dd($e);
+        // }
     }
 
     public function postShareShowContracts(Request $request){
